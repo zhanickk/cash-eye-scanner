@@ -11,7 +11,7 @@ export function AppHeader() {
         </Link>
         <nav aria-label="Основная навигация" className="flex gap-1">
           <Link to="/" className={nav} activeProps={{ className: "text-foreground bg-secondary" }} activeOptions={{ exact: true }}>Проверка</Link>
-          <a href="/annotation/" className={nav}>Разметка</a>
+          <a href="/annotation/index.html" className={nav}>Разметка</a>
           <a href="/annotation/training.html" className={nav}>Сервер и обучение</a>
           <Link to="/api-docs" className={nav} activeProps={{ className: "text-foreground bg-secondary" }}>API</Link>
         </nav>

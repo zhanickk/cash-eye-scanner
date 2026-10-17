@@ -7,7 +7,7 @@ export const Route = createFileRoute("/annotation")({
 
 function AnnotationRedirect() {
   useEffect(() => {
-    window.location.replace("/annotation/");
+    window.location.replace("/annotation/index.html");
   }, []);
 
   return (
@@ -15,7 +15,7 @@ function AnnotationRedirect() {
       <div>
         <h1 className="text-xl font-semibold">Открываю страницу разметки…</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Если переход не сработал, откройте <a className="underline" href="/annotation/">разметчик по этой ссылке</a>.
+          Если переход не сработал, откройте <a className="underline" href="/annotation/index.html">разметчик по этой ссылке</a>.
         </p>
       </div>
     </main>

@@ -5,7 +5,7 @@
   <title>Обучение модели — ForteBank</title><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="training.css">
 </head>
 <body class="training-page">
-  <header><div><span class="logo">F</span><span class="brand">Подготовка модели</span></div><nav class="app-nav"><a class="nav-link" href="/annotation/">Разметка</a><a class="nav-link active" href="/annotation/training.html">Обучение модели</a></nav><span class="offline">Данные проекта хранятся в этом браузере</span></header>
+  <header><div><span class="logo">F</span><span class="brand">Подготовка модели</span></div><nav class="app-nav"><a class="nav-link" href="/annotation/index.html">Разметка</a><a class="nav-link active" href="/annotation/training.html">Обучение модели</a></nav><span class="offline">Данные проекта хранятся в этом браузере</span></header>
   <main class="training-main">
     <section class="training-intro"><div class="kicker">Forte Vision · лаборатория</div><h1>Подготовка и обучение</h1><p>Сначала размечаем исходные видео и подтверждаем эпизоды. Панель проверяет, хватает ли данных для конкретного способа обучения. Пока подтверждённых меток нет, запуск модели закрыт.</p></section>
     <div id="training-alert" class="training-alert" role="status">Читаю проект разметки…</div>
@@ -15,7 +15,7 @@
       <article class="metric-card"><span>Подтверждённые эпизоды</span><strong id="metric-events">—</strong><small>События, которые разметчик сверил с видео</small></article>
       <article class="metric-card"><span>Спорные записи</span><strong id="metric-conflicts">—</strong><small>Нужны решение и согласованная метка</small></article>
     </section>
-    <section class="split-card"><div class="section-heading"><div><div class="kicker">Разделение данных</div><h2>Видео для обучения и проверки</h2></div><a class="secondary-link" href="/annotation/">Открыть разметку</a></div><div id="split-summary" class="split-summary"></div><p class="muted">Связанные и дублирующиеся ролики должны оставаться в одной части набора. Итоговые видео жюри в обучение не добавляем.</p></section>
+    <section class="split-card"><div class="section-heading"><div><div class="kicker">Разделение данных</div><h2>Видео для обучения и проверки</h2></div><a class="secondary-link" href="/annotation/index.html">Открыть разметку</a></div><div id="split-summary" class="split-summary"></div><p class="muted">Связанные и дублирующиеся ролики должны оставаться в одной части набора. Итоговые видео жюри в обучение не добавляем.</p></section>
     <div class="model-grid">
       <article class="model-card">
         <div class="model-top"><div><span class="model-tag">События во времени</span><h2>Qwen3-VL · LoRA</h2></div><span id="qwen-state" class="state-pill">Проверка…</span></div>
