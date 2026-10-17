@@ -8,3 +8,5 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Forte Vision UI talks only to the same local service via src/lib/api.ts (VITE_API_BASE_URL, default relative); no cloud backend or third-party video transfer — videos are sensitive.
