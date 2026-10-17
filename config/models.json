@@ -1,0 +1,30 @@
+{
+  "baseline": {
+    "model_id": "Qwen/Qwen3-VL-2B-Instruct",
+    "runtime": "llama.cpp",
+    "role": "Проверка наблюдаемых событий на локальном сервере",
+    "status": "weights_present_not_benchmarked",
+    "chat_url": "http://127.0.0.1:8081/v1/chat/completions"
+  },
+  "temporal_comparator": {
+    "name": "TimeLens2-2B",
+    "status": "not_installed",
+    "gate": "Проверить официальный checkpoint, лицензию и качество на validation до включения"
+  },
+  "object_detector": {
+    "name": "RF-DETR",
+    "status": "needs_reviewed_bounding_boxes",
+    "gate": "Реальное обучение после COCO-экспорта, качество на validation"
+  },
+  "pose": {
+    "name": "RTMW/MMPose",
+    "status": "deferred",
+    "gate": "Добавлять только после проверки различимости кистей на наших кадрах"
+  },
+  "not_used": [
+    "face_recognition",
+    "audio",
+    "cloud_ai_api",
+    "GRPO_on_current_small_dataset"
+  ]
+}

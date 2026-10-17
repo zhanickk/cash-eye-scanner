@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Разметка видео — ForteBank</title><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="training.css">
+</head>
+<body>
+  <header><div><span class="logo">F</span><span class="brand">Разметка видео</span></div><nav class="app-nav"><a class="nav-link active" href="/annotation/">Разметка</a><a class="nav-link" href="/annotation/training.html">Обучение модели</a></nav><span class="offline">Локальный инструмент · данные остаются в браузере</span></header>
+  <main>
+    <aside class="sidebar">
+      <div class="side-head"><h1>Набор видео</h1><span id="progress"></span></div>
+      <input id="search" type="search" placeholder="Найти видео: X-1">
+      <div id="video-list" class="video-list"></div>
+      <label class="upload" style="margin-top:16px">Добавить видеофайлы<input id="bulk-videos" type="file" accept="video/*" multiple></label><div class="side-actions"><button id="import-btn" class="secondary">Импорт JSON</button><button id="export-btn" class="secondary">Скачать проект JSON</button><input id="import-file" type="file" accept="application/json" hidden></div>
+    </aside>
+    <section class="workspace">
+      <div class="topline"><div><div class="kicker">Текущая запись</div><h2 id="video-title">Выберите видео</h2></div><label class="upload">Загрузить видео<input id="video-file" type="file" accept="video/*"></label></div>
+      <div class="notice" id="record-notice"></div>
+<div class="dataset-controls"><label>Часть набора<select id="split"><option value="unassigned">Не назначено</option><option value="train">Обучение</option><option value="validation">Проверка при разработке</option><option value="test">Итоговый тест</option></select></label><label>Исходная группа<input id="source-group" placeholder="Связанные записи — одна группа"></label><label>Камера<input id="camera-id" value="camera-01"></label></div>
+      <div class="player-wrap"><video id="player" controls playsinline></video><div id="empty-player">Выберите исходный видеофайл<br><small>Файл обрабатывается только этим браузером</small></div></div>
+      <div class="timeline-row"><span id="current-time">00:00.0</span><input id="seek" type="range" min="0" max="100" step="0.1" value="0"><span id="duration">00:00.0</span></div>
+      <div id="suggestions" class="suggestions"></div>
+      <div class="event-form">
+        <div class="form-title"><div><div class="kicker">Новый эпизод</div><h3>Опишите наблюдаемое действие</h3></div><button id="use-current" class="secondary">Взять время плеера</button></div>
+        <div class="fields"><label>Категория<select id="type"></select></label><label>Начало, сек.<input id="start" type="number" min="0" step="0.1"></label><label>Конец, сек.<input id="end" type="number" min="0" step="0.1"></label></div>
+        <label>Что видно на видео<textarea id="description" rows="2" placeholder="Только наблюдаемый факт, без предположения о намерении"></textarea></label>
+        <label>Почему это может нарушать правило<textarea id="reason" rows="2" placeholder="Связь с процедурой; не выдавайте это за установленный факт, если нужен пункт регламента"></textarea></label>
+        <div class="fields rule-fields"><label>Документ / версия<input id="rule-title" placeholder="Например, Регламент кассовых операций"></label><label>Пункт / раздел<input id="rule-section" placeholder="Уточнить по регламенту"></label></div>
+        <div id="evidence-tray" class="evidence-tray"></div><div class="event-actions"><button id="capture-evidence" type="button" class="secondary">Добавить текущий кадр</button><button id="add-event">Сохранить эпизод</button><button id="cancel-edit" type="button" class="secondary" hidden>Отменить редактирование</button><span id="form-message" aria-live="polite"></span></div>
+      </div>
+      <section class="event-form spatial-section"><div class="form-title"><div><div class="kicker">Обучение детектора и настройка камеры</div><h3>Рамки объектов и зоны</h3></div><button id="spatial-capture" class="secondary">Взять кадр из видео</button></div>
+<p>Возьмите кадр и протяните прямоугольник по объекту. Координаты сохраняются относительно кадра.</p>
+<div class="fields"><label>Что размечаем<select id="spatial-mode"><option value="object">Объект на кадре</option><option value="zone">Зона камеры</option></select></label><label>Объект<select id="object-label"><option value="person">Человек</option><option value="cash_bundle">Пачка денег</option><option value="identity_document">Удостоверение</option><option value="keys">Ключи</option><option value="safe_open">Сейф открыт</option><option value="safe_closed">Сейф закрыт</option><option value="door_open">Дверь открыта</option><option value="door_closed">Дверь закрыта</option><option value="journal">Журнал</option><option value="stamp">Штамп</option><option value="bag">Сумка / пакет</option><option value="drink">Напиток</option></select></label><label>Зона<select id="zone-label"><option value="desk">Стол</option><option value="safe">Сейф</option><option value="exit">Выход</option><option value="client">Клиентская зона</option><option value="counter">Счётный аппарат</option><option value="cashier">Рабочее место</option></select></label></div>
+<canvas id="spatial-canvas" width="640" height="360" aria-label="Редактор прямоугольных рамок"></canvas><p id="spatial-message" role="status">Кадр ещё не выбран</p>
+<label><span><input id="frame-reviewed" type="checkbox"> На этом кадре размечены все видимые объекты выбранных классов датасета</span></label>
+<div id="spatial-items"></div><div id="spatial-frames" class="suggestions"></div></section>
+<section class="events-section"><div class="form-title"><div><div class="kicker">Разметка ролика</div><h3>Отмеченные эпизоды</h3></div><label class="status-select">Итог просмотра<select id="review-status"><option value="unreviewed">Ещё не просмотрено</option><option value="reviewed_no_violation">Просмотрено: нарушений нет</option><option value="reviewed_with_violations">Просмотрено: есть эпизоды</option><option value="needs_adjudication">Нужно решение эксперта</option></select></label></div><div id="events"></div></section>
+      <label class="review-notes">Комментарий к просмотру<textarea id="review-notes" rows="2" placeholder="Почему безопасный похожий эпизод не является нарушением; что неразборчиво"></textarea></label><div id="save-status" role="status"></div><footer>Экспортируйте резервную копию JSON после работы. Финальный статус требует просмотра всего ролика. Времена из исходного списка — только подсказки.</footer>
+    </section>
+  </main>
+  <script src="data.js"></script><script src="app.js"></script>
+</body>
+</html>

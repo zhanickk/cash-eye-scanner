@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Обучение модели — ForteBank</title><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="training.css">
+</head>
+<body class="training-page">
+  <header><div><span class="logo">F</span><span class="brand">Подготовка модели</span></div><nav class="app-nav"><a class="nav-link" href="/annotation/">Разметка</a><a class="nav-link active" href="/annotation/training.html">Обучение модели</a></nav><span class="offline">Данные проекта хранятся в этом браузере</span></header>
+  <main class="training-main">
+    <section class="training-intro"><div class="kicker">Forte Vision · лаборатория</div><h1>Подготовка и обучение</h1><p>Сначала размечаем исходные видео и подтверждаем эпизоды. Панель проверяет, хватает ли данных для конкретного способа обучения. Пока подтверждённых меток нет, запуск модели закрыт.</p></section>
+    <div id="training-alert" class="training-alert" role="status">Читаю проект разметки…</div>
+    <section class="metric-grid" aria-label="Сводка набора">
+      <article class="metric-card"><span>Видео в проекте</span><strong id="metric-total">—</strong><small>Файлы сами по себе не считаются обучающими метками</small></article>
+      <article class="metric-card"><span>Проверено полностью</span><strong id="metric-reviewed">—</strong><small>Ролик просмотрен целиком</small></article>
+      <article class="metric-card"><span>Подтверждённые эпизоды</span><strong id="metric-events">—</strong><small>События, которые разметчик сверил с видео</small></article>
+      <article class="metric-card"><span>Спорные записи</span><strong id="metric-conflicts">—</strong><small>Нужны решение и согласованная метка</small></article>
+    </section>
+    <section class="split-card"><div class="section-heading"><div><div class="kicker">Разделение данных</div><h2>Видео для обучения и проверки</h2></div><a class="secondary-link" href="/annotation/">Открыть разметку</a></div><div id="split-summary" class="split-summary"></div><p class="muted">Связанные и дублирующиеся ролики должны оставаться в одной части набора. Итоговые видео жюри в обучение не добавляем.</p></section>
+    <div class="model-grid">
+      <article class="model-card">
+        <div class="model-top"><div><span class="model-tag">События во времени</span><h2>Qwen3-VL · LoRA</h2></div><span id="qwen-state" class="state-pill">Проверка…</span></div>
+        <p>Настройка локальной мультимодальной модели на подтверждённых эпизодах и полных исходных видео. Подходит для изучения контекста операции и последовательности действий.</p>
+        <h3>Что требуется</h3><ul id="qwen-checks" class="check-list"></ul>
+        <div class="model-footer"><span id="qwen-detail" class="muted"></span><div class="model-actions"><button id="qwen-train-export" class="secondary" disabled>Экспорт train JSONL</button><button id="qwen-valid-export" class="secondary" disabled>Экспорт validation JSONL</button><button id="qwen-start" class="primary-button" disabled>Сервер обучения не подключён</button></div></div>
+      </article>
+      <article class="model-card">
+        <div class="model-top"><div><span class="model-tag">Объекты на кадре</span><h2>RF-DETR · детектор</h2></div><span id="detector-state" class="state-pill">Проверка…</span></div>
+        <p>Обучение поиска видимых предметов: пачек денег, документов, ключей и зон кассы. Для этого размечают рамки на кадрах и отдельно проверяют набор объектов.</p>
+        <h3>Что требуется</h3><ul id="detector-checks" class="check-list"></ul>
+        <div class="model-footer"><span id="detector-detail" class="muted"></span><button id="detector-start" class="primary-button" disabled>Обучение пока недоступно</button></div>
+      </article>
+    </div>
+    <section class="training-steps"><div class="kicker">Рабочий порядок</div><h2>Как довести данные до обучения</h2><ol><li><b>Загрузить исходные файлы</b><span>Добавить видео в проект разметки и проверить, что идентификаторы и контрольные суммы совпали.</span></li><li><b>Разметить эпизоды и кадры</b><span>Для каждого ролика отметить либо подтверждённые нарушения с кадрами, либо полный просмотр без нарушений. Для детектора дополнительно обвести объекты.</span></li><li><b>Разнести целые ролики</b><span>Train и validation разделять по видео и камерам. Связанные копии не разносить по разным частям.</span></li><li><b>Проверить набор и обучить на Pod</b><span>После подключения сервера проверка сформирует обучающий экспорт. Само обучение выполняется на арендованном GPU, не на ноутбуке.</span></li><li><b>Сравнить с отложенными видео</b><span>Сначала смотрим ошибки на validation. Видео итоговой проверки жюри остаются отдельно.</span></li></ol></section>
+    <section class="server-card"><div><div class="kicker">Арендованный сервер</div><h2>Статус подключения</h2><p id="server-status" class="muted">Проверка сервера пока не выполнена.</p></div><button id="server-check" class="secondary">Проверить сервер</button></section>
+    <section class="export-card"><div><div class="kicker">Резервная копия</div><h2>Сохранить или загрузить разметку</h2><p class="muted">JSON содержит сведения о разметке и кадры-доказательства. Видео в него не встраиваются. Сохраняйте файл в защищённое место.</p></div><div class="backup-actions"><label class="secondary import-button">Импортировать JSON<input id="import-project" type="file" accept="application/json" hidden></label><button id="export-project" class="secondary">Скачать JSON проекта</button></div></section>
+    <footer>Система показывает готовность разметки, но не объявляет точность модели заранее. Для допуска к жюри потребуются замеры на отдельной проверочной выборке.</footer>
+  </main>
+  <script src="data.js"></script><script src="training.js"></script>
+</body>
+</html>

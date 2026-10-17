@@ -9,11 +9,19 @@ export interface EvidenceFrame {
   image_base64: string;
 }
 
+export interface RuleReference {
+  title: string | null;
+  section: string | null;
+  url: string | null;
+  status: string;
+}
+
 export interface Violation {
   type: string;
   timecode_sec: number;
   description: string;
   evidence_frames: EvidenceFrame[];
+  rule?: RuleReference;
 }
 
 export interface JobResponse {
@@ -24,6 +32,8 @@ export interface JobResponse {
   verdict?: Verdict;
   violations?: Violation[];
   error?: string;
+  review_required?: boolean;
+  limitations?: string[];
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -43,17 +53,26 @@ export function parseJobResponse(value: unknown): JobResponse {
     violations = value.violations.map((item): Violation => {
       if (!isRecord(item) || typeof item.type !== "string" || typeof item.description !== "string" ||
           typeof item.timecode_sec !== "number" || !Number.isFinite(item.timecode_sec) || item.timecode_sec < 0 ||
-          !Array.isArray(item.evidence_frames)) throw new TypeError("Invalid violation");
+          !Array.isArray(item.evidence_frames) || item.evidence_frames.length < 1 || item.evidence_frames.length > 3) throw new TypeError("Invalid violation");
       const evidence_frames = item.evidence_frames.map((frame): EvidenceFrame => {
         if (!isRecord(frame) || typeof frame.timestamp_sec !== "number" ||
             !Number.isFinite(frame.timestamp_sec) || frame.timestamp_sec < 0 ||
             typeof frame.image_base64 !== "string") throw new TypeError("Invalid evidence frame");
         return { timestamp_sec: frame.timestamp_sec, image_base64: frame.image_base64 };
       });
-      return { type: item.type, timecode_sec: item.timecode_sec, description: item.description, evidence_frames };
+      let rule: RuleReference | undefined;
+      if (isRecord(item.rule)) {
+        const ref = item.rule;
+        rule = { title: typeof ref.title === "string" ? ref.title : null,
+          section: typeof ref.section === "string" ? ref.section : null,
+          url: typeof ref.url === "string" && isSafeHttpUrl(ref.url) ? ref.url : null,
+          status: typeof ref.status === "string" ? ref.status : "unverified" };
+      }
+      return { type: item.type, timecode_sec: item.timecode_sec, description: item.description, evidence_frames, ...(rule ? { rule } : {}) };
     });
   }
   if (value.status === "done" && (value.verdict === undefined || violations === undefined)) throw new TypeError("Completed jobs require verdict and violations");
+  if (value.status === "done" && value.verdict !== (violations?.length ? "violation" : "no_violation")) throw new TypeError("Verdict disagrees with violations");
   return {
     job_id: value.job_id, status: value.status as JobStatus,
     ...(typeof value.stage === "string" ? { stage: value.stage } : {}),
@@ -61,6 +80,8 @@ export function parseJobResponse(value: unknown): JobResponse {
     ...(value.verdict ? { verdict: value.verdict as Verdict } : {}),
     ...(violations ? { violations } : {}),
     ...(typeof value.error === "string" ? { error: value.error } : {}),
+    ...(typeof value.review_required === "boolean" ? { review_required: value.review_required } : {}),
+    ...(Array.isArray(value.limitations) && value.limitations.every(x => typeof x === "string") ? { limitations: value.limitations as string[] } : {}),
   };
 }
 
@@ -146,14 +167,17 @@ async function readError(res: Response): Promise<string> {
   }
 }
 
-export function uploadVideo(
+export async function uploadVideo(
   file: File,
   onProgress: (pct: number) => void,
   signal: AbortSignal,
 ): Promise<string> {
+  const session = await uiToken(signal);
+  if (signal.aborted) throw new DOMException("Aborted", "AbortError");
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open("POST", `${API_BASE}/ui/analyze`);
+    xhr.setRequestHeader("X-UI-Session", session);
     xhr.upload.onprogress = (e) => e.lengthComputable && onProgress(Math.round((e.loaded / e.total) * 100));
     xhr.onerror = () => reject(unreachable());
     xhr.onabort = () => reject(new DOMException("Aborted", "AbortError"));
@@ -181,7 +205,7 @@ export function uploadVideo(
 export async function getJob(jobId: string, signal: AbortSignal): Promise<JobResponse> {
   let res: Response;
   try {
-    res = await fetch(`${API_BASE}/ui/jobs/${encodeURIComponent(jobId)}`, { signal });
+    res = await fetch(`${API_BASE}/ui/jobs/${encodeURIComponent(jobId)}`, { signal, headers: { "X-UI-Session": await uiToken(signal) } });
   } catch (e) {
     if ((e as Error).name === "AbortError") throw e;
     throw unreachable();
@@ -201,4 +225,18 @@ export async function getJob(jobId: string, signal: AbortSignal): Promise<JobRes
   } catch {
     throw new ApiError("Ответ сервиса не соответствует формату API. Проверьте схему ответа.", "format");
   }
+}
+
+// Browser sessions scope UI jobs without embedding the jury key in the bundle.
+let sessionToken: string | null = null;
+async function uiToken(signal: AbortSignal): Promise<string> {
+  if (sessionToken) return sessionToken;
+  let response: Response;
+  try { response = await fetch(`${API_BASE}/ui/session`, { signal }); }
+  catch (error) { if ((error as Error).name === "AbortError") throw error; throw unreachable(); }
+  if (!response.ok) throw new ApiError("Не удалось создать сессию интерфейса", "http");
+  const value: unknown = await response.json();
+  if (!isRecord(value) || typeof value.session_token !== "string") throw new ApiError("Сервис не вернул сессию интерфейса", "format");
+  sessionToken = value.session_token;
+  return sessionToken;
 }

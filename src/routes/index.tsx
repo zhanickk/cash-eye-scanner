@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { TYPE_NAMES } from "@/lib/violation-types";
 import { AppHeader } from "@/components/AppHeader";
 import {
   ApiError, MAX_POLL_MS, POLL_INTERVAL_MS, VERDICT_LABEL, formatTime, frameDataUrl, getJob,
@@ -216,6 +217,8 @@ function Result({ job, onSeek }: { job: JobResponse; onSeek: (s: number) => void
           {violations.map((item, i) => <ViolationCard key={i} violation={item} n={i + 1} onSeek={onSeek} />)}
         </ol>
       )}
+      {job.review_required && <p role="status" className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">Есть неоднозначные фрагменты. Они требуют просмотра человеком; результат не подтверждает, что все действия удалось оценить.</p>}
+      {job.limitations?.map((text, i) => <p key={i} className="text-sm text-muted-foreground">{text}</p>)}
       {violation && violations.length === 0 && <p className="text-sm text-muted-foreground">Сервис не передал детали возможных нарушений.</p>}
     </section>
   );
@@ -231,7 +234,7 @@ function ViolationCard({ violation, n, onSeek }: { violation: Violation; n: numb
     <li className="card-surface p-5">
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-sm font-semibold text-muted-foreground">#{n}</span>
-        <span className="rounded-lg bg-accent px-2.5 py-1 text-sm font-semibold text-accent-foreground">{violation.type || "Тип не указан"}</span>
+        <span className="rounded-lg bg-accent px-2.5 py-1 text-sm font-semibold text-accent-foreground">{TYPE_NAMES[violation.type] || violation.type || "Тип не указан"}</span>
         {sec !== null && <button onClick={() => onSeek(sec)} className="rounded-lg border border-input px-2.5 py-1 font-mono text-sm font-semibold hover:bg-muted focus-visible:outline-2 focus-visible:outline-ring" aria-label={"Перейти к моменту " + formatTime(sec)}>▶ {formatTime(sec)}</button>}
       </div>
       {violation.description && <p className="mt-3">{violation.description}</p>}
@@ -245,7 +248,7 @@ function ViolationCard({ violation, n, onSeek }: { violation: Violation; n: numb
           </button>;
         })}
       </div>}
-      <div className="mt-3 border-t border-border pt-3 text-sm"><span className="text-muted-foreground">Правило / источник: </span><span className="font-medium">Источник не указан</span></div>
+      <div className="mt-3 border-t border-border pt-3 text-sm"><span className="text-muted-foreground">Правило / источник: </span><span className="font-medium">{violation.rule?.title || "Источник не подтверждён"}{violation.rule?.section ? ` · ${violation.rule.section}` : ""}</span>{violation.rule?.url && <a href={violation.rule.url} target="_blank" rel="noopener noreferrer" className="ml-2 underline">Открыть источник</a>}{violation.rule?.status === "unverified" && <p className="mt-1 text-muted-foreground">Нормативная привязка требует проверки; модель её не устанавливает.</p>}</div>
       <dialog ref={dlg} onClose={() => setZoom(null)} onClick={(e) => e.target === dlg.current && dlg.current?.close()} className="m-auto max-w-[95vw] rounded-2xl bg-card p-0 backdrop:bg-foreground/70" aria-label="Кадр крупно">
         {zoom && <img src={zoom} alt={"Кадр события " + n + " крупно"} className="max-h-[80vh] w-auto" />}
         <form method="dialog" className="flex justify-end p-3"><button className="rounded-lg px-4 py-2 text-sm font-semibold hover:bg-muted focus-visible:outline-2 focus-visible:outline-ring" autoFocus>Закрыть</button></form>
