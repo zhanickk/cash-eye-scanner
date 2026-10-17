@@ -48,9 +48,9 @@ function Index() {
   const pick = (files: FileList | null) => {
     if (!files || files.length === 0) return;
     if (files.length > 1) { setFileError("Можно загрузить только один файл."); return; }
-    const err = validateFile(files[0]);
+    const err = validateFile(files[0]!);
     setFileError(err);
-    if (!err) { setFile(files[0]); setPhase({ kind: "idle" }); }
+    if (!err) { setFile(files[0]!); setPhase({ kind: "idle" }); }
   };
 
   const start = useCallback(async () => {
