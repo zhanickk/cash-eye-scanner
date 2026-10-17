@@ -22,7 +22,7 @@ type Phase =
   | { kind: "idle" }
   | { kind: "uploading"; pct: number }
   | { kind: "queued"; jobId: string }
-  | { kind: "analyzing"; jobId: string; progress?: number }
+  | { kind: "analyzing"; jobId: string; progress?: number | undefined }
   | { kind: "done"; job: JobResponse }
   | { kind: "failed"; message: string; network?: boolean };
 
@@ -181,7 +181,7 @@ function StatusBlock({ phase }: { phase: Phase }) {
       <div role="alert" className="rounded-xl bg-destructive/10 p-3 text-sm">
         <p className="font-semibold text-destructive">Не удалось обработать</p>
         <p className="mt-1 break-words text-foreground">{phase.message}</p>
-        {phase.network && <p className="mt-1 text-muted-foreground">Текущий адрес сервиса: <code>{import.meta.env.VITE_API_BASE_URL || "относительный путь (тот же сервер)"}</code></p>}
+        {phase.network && <p className="mt-1 text-muted-foreground">Текущий адрес сервиса: <code>{import.meta.env["VITE_API_BASE_URL"] || "относительный путь (тот же сервер)"}</code></p>}
       </div>
     );
   const idx = phase.kind === "uploading" ? 0 : phase.kind === "queued" ? 1 : phase.kind === "analyzing" ? 2 : 3;

@@ -1,5 +1,5 @@
 // Client for the local Forte Vision service. No third-party calls.
-export const API_BASE = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/$/, "");
+export const API_BASE = (import.meta.env["VITE_API_BASE_URL"] ?? "").replace(/\/$/, "");
 
 export type JobStatus = "processing" | "done" | "failed";
 export type Verdict = "no_violation" | "violation";
