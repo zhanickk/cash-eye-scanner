@@ -5,7 +5,7 @@ let project = null;
 
 function openProjectDb() {
   return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, 1);
+    const req = indexedDB.open(DB_NAME, 2);
     req.onupgradeneeded = () => {
       if (!req.result.objectStoreNames.contains('projects')) req.result.createObjectStore('projects');
     };
