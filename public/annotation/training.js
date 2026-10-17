@@ -1,4 +1,6 @@
 const DB_NAME = 'forte-annotation-v2';
+const API_BASE_KEY = 'forte_api_base_url';
+const DEFAULT_API_BASE = 'https://pl9lv4603tade1-8000.proxy.runpod.net';
 const $ = id => document.getElementById(id);
 const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let project = null;
@@ -156,24 +158,47 @@ function exportSft(split) {
 
 async function checkServer() {
   const status = $('server-status');
-  status.textContent = 'Проверяю доступ к локальному сервису…';
+  let base;
   try {
-    const response = await fetch('/health', {headers: {Accept: 'application/json'}, cache: 'no-store'});
+    const parsed = new URL($('server-url').value.trim());
+    if (parsed.protocol !== 'https:') throw new Error('Используйте HTTPS-адрес Pod.');
+    base = parsed.origin;
+  } catch (error) {
+    status.textContent = error.message || 'Укажите корректный HTTPS-адрес.';
+    return;
+  }
+  status.textContent = `Проверяю ${base}…`;
+  try {
+    const response = await fetch(`${base}/health`, {headers: {Accept: 'application/json'}, cache: 'no-store'});
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const health = await response.json();
     status.textContent = `Сервис доступен. Локальная модель: ${health.model_ready ? 'готова' : 'не запущена'}; обученный детектор: ${health.trained_detector_ready ? 'есть' : 'ещё не обучен'}.`;
-  } catch {
-    status.textContent = 'Сервис пока не подключён. После настройки Pod откройте эту страницу через адрес сервиса на сервере.';
+  } catch (error) {
+    status.textContent = `Не удалось связаться с сервером: ${error.message || 'проверьте адрес, доступность Pod и разрешение CORS.'}`;
   }
 }
 
 async function initTraining() {
+  const savedBase = (() => { try { return localStorage.getItem(API_BASE_KEY); } catch { return null; } })();
+  $('server-url').value = (savedBase || DEFAULT_API_BASE).replace(/\/$/, '');
+  $('server-check').onclick = checkServer;
+  $('server-save').onclick = () => {
+    const value = $('server-url').value.trim().replace(/\/$/, '');
+    try {
+      const parsed = new URL(value);
+      if (parsed.protocol !== 'https:') throw new Error('Используйте HTTPS-адрес Pod.');
+      localStorage.setItem(API_BASE_KEY, parsed.origin);
+      $('server-url').value = parsed.origin;
+      $('server-status').textContent = `Адрес сохранён в этом браузере: ${parsed.origin}`;
+    } catch (error) {
+      $('server-status').textContent = error.message || 'Укажите корректный HTTPS-адрес.';
+    }
+  };
   try {
     const db = await openProjectDb();
     project = await readProject(db);
     render();
     $('export-project').onclick = downloadProject;
-    $('server-check').onclick = checkServer;
     $('import-project').onchange = async event => {
       try {
         const file = event.target.files?.[0];
@@ -202,8 +227,8 @@ async function initTraining() {
         event.target.value = '';
       }
     };
-  } catch {
-    $('training-alert').textContent = 'Не удалось прочитать локальный проект. Откройте разметку один раз, затем вернитесь сюда.';
+  } catch (error) {
+    $('training-alert').textContent = `Не удалось открыть локальный проект в этом браузере: ${error.message || 'проверьте доступ к IndexedDB'}. Разметка с сайта Lovable хранится отдельно; при переносе между сайтами экспортируйте JSON на странице разметки и импортируйте его здесь.`;
   }
 }
 

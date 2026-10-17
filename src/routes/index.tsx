@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { TYPE_NAMES } from "@/lib/violation-types";
 import { AppHeader } from "@/components/AppHeader";
 import {
-  ApiError, MAX_POLL_MS, POLL_INTERVAL_MS, VERDICT_LABEL, formatTime, frameDataUrl, getJob,
+  ApiError, MAX_POLL_MS, POLL_INTERVAL_MS, VERDICT_LABEL, formatTime, frameDataUrl, getApiBase, getJob,
   parseSeconds, uploadVideo, validateFile, type Violation, type JobResponse,
 } from "@/lib/api";
 
@@ -182,7 +182,7 @@ function StatusBlock({ phase }: { phase: Phase }) {
       <div role="alert" className="rounded-xl bg-destructive/10 p-3 text-sm">
         <p className="font-semibold text-destructive">Не удалось обработать</p>
         <p className="mt-1 break-words text-foreground">{phase.message}</p>
-        {phase.network && <p className="mt-1 text-muted-foreground">Текущий адрес сервиса: <code>{import.meta.env["VITE_API_BASE_URL"] || "относительный путь (тот же сервер)"}</code></p>}
+        {phase.network && <p className="mt-1 text-muted-foreground">Текущий адрес сервиса: <code>{getApiBase()}</code>. Настроить его можно в разделе «Обучение модели».</p>}
       </div>
     );
   const idx = phase.kind === "uploading" ? 0 : phase.kind === "queued" ? 1 : phase.kind === "analyzing" ? 2 : 3;

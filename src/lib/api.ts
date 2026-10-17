@@ -1,5 +1,16 @@
 // Client for the local Forte Vision service. No third-party calls.
-export const API_BASE = (import.meta.env["VITE_API_BASE_URL"] ?? "").replace(/\/$/, "");
+const DEFAULT_API_BASE = "https://pl9lv4603tade1-8000.proxy.runpod.net";
+const API_BASE_STORAGE_KEY = "forte_api_base_url";
+
+export function getApiBase(): string {
+  let configured = "";
+  try {
+    configured = typeof window !== "undefined" ? window.localStorage.getItem(API_BASE_STORAGE_KEY)?.trim() ?? "" : "";
+  } catch {
+    // Storage may be disabled by browser privacy settings; keep the configured defaults usable.
+  }
+  return (configured || import.meta.env["VITE_API_BASE_URL"] || DEFAULT_API_BASE).replace(/\/$/, "");
+}
 
 export type JobStatus = "processing" | "done" | "failed";
 export type Verdict = "no_violation" | "violation";
@@ -134,7 +145,7 @@ export function formatTime(sec: number): string {
 
 export function resolveAssetUrl(src: string): string {
   if (/^(https?:|data:|blob:)/i.test(src)) return src;
-  return `${API_BASE}${src.startsWith("/") ? "" : "/"}${src}`;
+  return `${getApiBase()}${src.startsWith("/") ? "" : "/"}${src}`;
 }
 
 export function isSafeHttpUrl(url?: string): boolean {
@@ -149,7 +160,7 @@ export function isSafeHttpUrl(url?: string): boolean {
 
 const unreachable = () =>
   new ApiError(
-    `Локальный сервис анализа недоступен по адресу «${API_BASE || window.location.origin}». Проверьте, что сервис запущен, и задайте адрес через переменную VITE_API_BASE_URL.`,
+    `Локальный сервис анализа недоступен по адресу «${getApiBase() || window.location.origin}». Проверьте, что Pod запущен и адрес сервера указан в разделе «Обучение модели».`,
     "network",
   );
 
@@ -176,7 +187,7 @@ export async function uploadVideo(
   if (signal.aborted) throw new DOMException("Aborted", "AbortError");
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
-    xhr.open("POST", `${API_BASE}/ui/analyze`);
+    xhr.open("POST", `${getApiBase()}/ui/analyze`);
     xhr.setRequestHeader("X-UI-Session", session);
     xhr.upload.onprogress = (e) => e.lengthComputable && onProgress(Math.round((e.loaded / e.total) * 100));
     xhr.onerror = () => reject(unreachable());
@@ -205,7 +216,7 @@ export async function uploadVideo(
 export async function getJob(jobId: string, signal: AbortSignal): Promise<JobResponse> {
   let res: Response;
   try {
-    res = await fetch(`${API_BASE}/ui/jobs/${encodeURIComponent(jobId)}`, { signal, headers: { "X-UI-Session": await uiToken(signal) } });
+    res = await fetch(`${getApiBase()}/ui/jobs/${encodeURIComponent(jobId)}`, { signal, headers: { "X-UI-Session": await uiToken(signal) } });
   } catch (e) {
     if ((e as Error).name === "AbortError") throw e;
     throw unreachable();
@@ -232,7 +243,7 @@ let sessionToken: string | null = null;
 async function uiToken(signal: AbortSignal): Promise<string> {
   if (sessionToken) return sessionToken;
   let response: Response;
-  try { response = await fetch(`${API_BASE}/ui/session`, { signal }); }
+  try { response = await fetch(`${getApiBase()}/ui/session`, { signal }); }
   catch (error) { if ((error as Error).name === "AbortError") throw error; throw unreachable(); }
   if (!response.ok) throw new ApiError("Не удалось создать сессию интерфейса", "http");
   const value: unknown = await response.json();
