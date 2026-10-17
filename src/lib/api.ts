@@ -4,31 +4,71 @@ export const API_BASE = (import.meta.env["VITE_API_BASE_URL"] ?? "").replace(/\/
 export type JobStatus = "processing" | "done" | "failed";
 export type Verdict = "no_violation" | "violation";
 
-export interface EventSource {
-  title?: string;
-  document?: string;
-  section?: string;
-  clause?: string;
-  url?: string;
+export interface EvidenceFrame {
+  timestamp_sec: number;
+  image_base64: string;
 }
 
-export interface JobEvent {
-  type?: string;
-  timestamp?: number | string;
-  time?: number | string;
-  description?: string;
-  frames?: string[];
-  source?: EventSource | null;
+export interface Violation {
+  type: string;
+  timecode_sec: number;
+  description: string;
+  evidence_frames: EvidenceFrame[];
 }
 
 export interface JobResponse {
   job_id: string;
-  status: JobStatus | string;
+  status: JobStatus;
   stage?: string;
   progress?: number;
   verdict?: Verdict;
-  events?: JobEvent[];
+  violations?: Violation[];
   error?: string;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+export function parseJobResponse(value: unknown): JobResponse {
+  if (!isRecord(value) || typeof value.job_id !== "string" ||
+      !["processing", "done", "failed"].includes(String(value.status))) throw new TypeError("Invalid job response");
+  if (value.verdict !== undefined && value.verdict !== "no_violation" && value.verdict !== "violation") throw new TypeError("Invalid verdict");
+  if (value.progress !== undefined && (typeof value.progress !== "number" || !Number.isFinite(value.progress))) throw new TypeError("Invalid progress");
+  if (value.stage !== undefined && typeof value.stage !== "string") throw new TypeError("Invalid stage");
+  if (value.error !== undefined && typeof value.error !== "string") throw new TypeError("Invalid error");
+  let violations: Violation[] | undefined;
+  if (value.violations !== undefined) {
+    if (!Array.isArray(value.violations)) throw new TypeError("Invalid violations");
+    violations = value.violations.map((item): Violation => {
+      if (!isRecord(item) || typeof item.type !== "string" || typeof item.description !== "string" ||
+          typeof item.timecode_sec !== "number" || !Number.isFinite(item.timecode_sec) || item.timecode_sec < 0 ||
+          !Array.isArray(item.evidence_frames)) throw new TypeError("Invalid violation");
+      const evidence_frames = item.evidence_frames.map((frame): EvidenceFrame => {
+        if (!isRecord(frame) || typeof frame.timestamp_sec !== "number" ||
+            !Number.isFinite(frame.timestamp_sec) || frame.timestamp_sec < 0 ||
+            typeof frame.image_base64 !== "string") throw new TypeError("Invalid evidence frame");
+        return { timestamp_sec: frame.timestamp_sec, image_base64: frame.image_base64 };
+      });
+      return { type: item.type, timecode_sec: item.timecode_sec, description: item.description, evidence_frames };
+    });
+  }
+  if (value.status === "done" && (value.verdict === undefined || violations === undefined)) throw new TypeError("Completed jobs require verdict and violations");
+  return {
+    job_id: value.job_id, status: value.status as JobStatus,
+    ...(typeof value.stage === "string" ? { stage: value.stage } : {}),
+    ...(typeof value.progress === "number" ? { progress: value.progress } : {}),
+    ...(value.verdict ? { verdict: value.verdict as Verdict } : {}),
+    ...(violations ? { violations } : {}),
+    ...(typeof value.error === "string" ? { error: value.error } : {}),
+  };
+}
+
+export function frameDataUrl(imageBase64: string): string {
+  const header = imageBase64.slice(0, imageBase64.indexOf(",")).toLowerCase();
+  return header.startsWith("data:image/") && header.endsWith(";base64")
+    ? imageBase64
+    : "data:image/jpeg;base64," + imageBase64;
 }
 
 export class ApiError extends Error {
@@ -151,7 +191,12 @@ export async function getJob(jobId: string, signal: AbortSignal): Promise<JobRes
     throw new ApiError(`Сервис вернул ошибку ${res.status}${msg ? `: ${msg}` : ""}`, "http");
   }
   try {
-    return (await res.json()) as JobResponse;
+    const payload: unknown = await res.json();
+    try {
+      return parseJobResponse(payload);
+    } catch {
+      throw new ApiError("Ответ сервиса не соответствует формату API. Проверьте схему ответа.", "format");
+    }
   } catch {
     throw new ApiError("Ответ сервиса не является JSON. Проверьте адрес сервиса.", "format");
   }

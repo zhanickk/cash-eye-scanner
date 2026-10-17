@@ -13,24 +13,17 @@ export const Route = createFileRoute("/api-docs")({
   component: ApiDocs,
 });
 
-const example = `{
-  "job_id": "3f2c9a1e-...",
-  "status": "done",
-  "verdict": "violation",
-  "events": [
-    {
-      "type": "...",
-      "timestamp": 42.5,
-      "description": "...",
-      "frames": ["/frames/3f2c9a1e/42.jpg"],
-      "source": {
-        "title": "...",
-        "section": "...",
-        "url": "https://..."
-      }
-    }
-  ]
-}`;
+const example = JSON.stringify({
+  job_id: "3f2c9a1e-...",
+  status: "done",
+  verdict: "violation",
+  violations: [{
+    type: "Пример типа из разметки",
+    timecode_sec: 42.5,
+    description: "Кратко описано наблюдаемое действие.",
+    evidence_frames: [{ timestamp_sec: 42.5, image_base64: "<base64 JPEG>" }],
+  }],
+}, null, 2);
 
 function Code({ children }: { children: string }) {
   return (
@@ -57,7 +50,7 @@ function ApiDocs() {
         <section className="card-surface space-y-3 p-5" aria-labelledby="a2">
           <h2 id="a2" className="font-semibold"><span className="mr-2 rounded bg-accent px-2 py-0.5 text-xs text-accent-foreground">GET</span>/api/v1/jobs/{"{job_id}"}</h2>
           <p className="text-sm text-muted-foreground">
-            <code>status</code>: <code>processing</code> / <code>done</code> / <code>failed</code>. При <code>done</code> — <code>verdict</code>: <code>no_violation</code> / <code>violation</code>.
+            <code>status</code>: <code>processing</code> / <code>done</code> / <code>failed</code>. При <code>done</code> возвращаются <code>verdict</code> (<code>no_violation</code> / <code>violation</code>) и массив <code>violations</code>. Каждый элемент содержит <code>type</code>, <code>timecode_sec</code>, <code>description</code> и <code>evidence_frames</code> с <code>timestamp_sec</code> и <code>image_base64</code>.
           </p>
           <Code>{`curl "$BASE/api/v1/jobs/<job_id>" -H "X-API-Key: <ВАШ_КЛЮЧ>"`}</Code>
           <h3 className="pt-2 text-sm font-semibold">Пример ответа (структура)</h3>

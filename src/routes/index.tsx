@@ -2,8 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AppHeader } from "@/components/AppHeader";
 import {
-  ApiError, MAX_POLL_MS, POLL_INTERVAL_MS, VERDICT_LABEL, formatTime, getJob, isSafeHttpUrl,
-  parseSeconds, resolveAssetUrl, uploadVideo, validateFile, type JobEvent, type JobResponse,
+  ApiError, MAX_POLL_MS, POLL_INTERVAL_MS, VERDICT_LABEL, formatTime, frameDataUrl, getJob,
+  parseSeconds, uploadVideo, validateFile, type Violation, type JobResponse,
 } from "@/lib/api";
 
 export const Route = createFileRoute("/")({
@@ -201,7 +201,7 @@ function StatusBlock({ phase }: { phase: Phase }) {
 }
 
 function Result({ job, onSeek }: { job: JobResponse; onSeek: (s: number) => void }) {
-  const events = job.events ?? [];
+  const violations = job.violations ?? [];
   const violation = job.verdict === "violation";
   const label = job.verdict ? VERDICT_LABEL[job.verdict] : "Вердикт не получен от сервиса";
   return (
@@ -211,58 +211,43 @@ function Result({ job, onSeek }: { job: JobResponse; onSeek: (s: number) => void
         <h2 id="res-title" className={`mt-1 text-xl font-bold ${violation ? "text-warning" : job.verdict ? "text-success" : ""}`}>{label}</h2>
         <p className="mt-2 text-sm text-foreground/80">Результат — подсказка для проверки человеком, а не окончательное решение.</p>
       </div>
-      {events.length > 0 && (
+      {violations.length > 0 && (
         <ol className="space-y-3">
-          {events.map((ev, i) => <EventCard key={i} ev={ev} n={i + 1} onSeek={onSeek} />)}
+          {violations.map((item, i) => <ViolationCard key={i} violation={item} n={i + 1} onSeek={onSeek} />)}
         </ol>
       )}
-      {violation && events.length === 0 && <p className="text-sm text-muted-foreground">Сервис не передал детали событий.</p>}
+      {violation && violations.length === 0 && <p className="text-sm text-muted-foreground">Сервис не передал детали возможных нарушений.</p>}
     </section>
   );
 }
 
-function EventCard({ ev, n, onSeek }: { ev: JobEvent; n: number; onSeek: (s: number) => void }) {
+function ViolationCard({ violation, n, onSeek }: { violation: Violation; n: number; onSeek: (s: number) => void }) {
   const [zoom, setZoom] = useState<string | null>(null);
   const dlg = useRef<HTMLDialogElement>(null);
   useEffect(() => { if (zoom) dlg.current?.showModal(); }, [zoom]);
-  const sec = parseSeconds(ev.timestamp ?? ev.time);
-  const frames = (ev.frames ?? []).slice(0, 3);
-  const src = ev.source;
-  const docTitle = src?.title || src?.document;
-  const section = src?.section || src?.clause;
+  const sec = parseSeconds(violation.timecode_sec);
+  const frames = violation.evidence_frames.slice(0, 3);
   return (
     <li className="card-surface p-5">
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-sm font-semibold text-muted-foreground">#{n}</span>
-        <span className="rounded-lg bg-accent px-2.5 py-1 text-sm font-semibold text-accent-foreground">{ev.type || "Тип не указан"}</span>
-        {sec !== null && (
-          <button onClick={() => onSeek(sec)} className="rounded-lg border border-input px-2.5 py-1 font-mono text-sm font-semibold hover:bg-muted focus-visible:outline-2 focus-visible:outline-ring" aria-label={`Перейти к моменту ${formatTime(sec)}`}>▶ {formatTime(sec)}</button>
-        )}
+        <span className="rounded-lg bg-accent px-2.5 py-1 text-sm font-semibold text-accent-foreground">{violation.type || "Тип не указан"}</span>
+        {sec !== null && <button onClick={() => onSeek(sec)} className="rounded-lg border border-input px-2.5 py-1 font-mono text-sm font-semibold hover:bg-muted focus-visible:outline-2 focus-visible:outline-ring" aria-label={"Перейти к моменту " + formatTime(sec)}>▶ {formatTime(sec)}</button>}
       </div>
-      {ev.description && <p className="mt-3">{ev.description}</p>}
-      {frames.length > 0 && (
-        <div className="mt-3 flex flex-wrap gap-2">
-          {frames.map((f, i) => (
-            <button key={i} onClick={() => setZoom(resolveAssetUrl(f))} className="overflow-hidden rounded-lg border border-border focus-visible:outline-2 focus-visible:outline-ring" aria-label={`Открыть кадр ${i + 1} крупнее`}>
-              <img src={resolveAssetUrl(f)} alt={`Кадр-доказательство ${i + 1} события ${n}`} className="h-24 w-40 object-cover" loading="lazy" />
-            </button>
-          ))}
-        </div>
-      )}
-      <div className="mt-3 border-t border-border pt-3 text-sm">
-        <span className="text-muted-foreground">Правило / источник: </span>
-        {docTitle || section || src?.url ? (
-          <>
-            {docTitle && <span className="font-medium">{docTitle}</span>}
-            {section && <span>{docTitle ? ", " : ""}{section}</span>}
-            {isSafeHttpUrl(src?.url) && (
-              <> · <a href={src!.url} target="_blank" rel="noopener noreferrer nofollow" className="font-medium text-primary underline underline-offset-4">Открыть источник<span className="sr-only"> (в новой вкладке)</span> ↗</a></>
-            )}
-          </>
-        ) : <span className="font-medium">Источник не указан</span>}
-      </div>
+      {violation.description && <p className="mt-3">{violation.description}</p>}
+      {frames.length > 0 && <div className="mt-3 flex flex-wrap gap-2">
+        {frames.map((frame, i) => {
+          const src = frameDataUrl(frame.image_base64);
+          const frameTime = formatTime(frame.timestamp_sec);
+          return <button key={i} onClick={() => setZoom(src)} className="overflow-hidden rounded-lg border border-border focus-visible:outline-2 focus-visible:outline-ring" aria-label={"Открыть кадр " + (i + 1) + " крупнее, " + frameTime}>
+            <img src={src} alt={"Кадр-доказательство " + (i + 1) + " события " + n + ", " + frameTime} className="h-24 w-40 object-cover" loading="lazy" />
+            <span className="block px-2 py-1 text-xs text-muted-foreground">{frameTime}</span>
+          </button>;
+        })}
+      </div>}
+      <div className="mt-3 border-t border-border pt-3 text-sm"><span className="text-muted-foreground">Правило / источник: </span><span className="font-medium">Источник не указан</span></div>
       <dialog ref={dlg} onClose={() => setZoom(null)} onClick={(e) => e.target === dlg.current && dlg.current?.close()} className="m-auto max-w-[95vw] rounded-2xl bg-card p-0 backdrop:bg-foreground/70" aria-label="Кадр крупно">
-        {zoom && <img src={zoom} alt={`Кадр события ${n} крупно`} className="max-h-[80vh] w-auto" />}
+        {zoom && <img src={zoom} alt={"Кадр события " + n + " крупно"} className="max-h-[80vh] w-auto" />}
         <form method="dialog" className="flex justify-end p-3"><button className="rounded-lg px-4 py-2 text-sm font-semibold hover:bg-muted focus-visible:outline-2 focus-visible:outline-ring" autoFocus>Закрыть</button></form>
       </dialog>
     </li>
