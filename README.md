@@ -1,14 +1,27 @@
-# Welcome to your Lovable project
+# Cash Eye Scanner
+
+Сделай русскоязычный веб-интерфейс «Forte Vision» для проверки видео кассовых операций. Это операторский инструмент для удобной загрузки и просмотра результата; дизайн должен выглядеть как готовый банковский продукт: чистый, спокойный, современный, без лишних панелей, адаптивный для ноутбука и мобильного экрана.
+
+Основной сценарий:
+1. На главном экране пользователь перетаскивает или выбирает один файл .mov. Покажи допустимый формат и понятные ошибки валидации.
+2. После загрузки сразу покажи прогресс и понятный статус: «Загружаем», «Видео в очереди», «Идёт анализ», «Готово» или «Не удалось обработать». Не блокируй страницу; дай возможность отменить ожидание/начать новую проверку.
+3. Подключи UI к существующему локальному API того же сервиса: POST /ui/analyze с multipart-полем file возвращает job_id; затем опрашивай GET /ui/jobs/{job_id} примерно раз в 2 секунды, максимум 5 минут. Базовый адрес должен задаваться через VITE_API_BASE_URL, по умолчанию относительный путь. Не добавляй Supabase, внешнее хранилище, облачный AI или передачу видео третьим сторонам. Не проси API-ключ у пользователя в UI и не встраивай ключ жюри во фронтенд.
+4. Готовый результат показывает один из двух вердиктов: «Нарушение не обнаружено» или «Обнаружены признаки возможных нарушений». Для каждого события покажи тип, таймкод, краткое описание наблюдаемого действия, 1–3 кадра-доказательства и правило/источник (название документа, пункт/раздел и ссылка), если эти сведения возвращены API. Не выдумывай нарушение, норму, пункт закона или ссылку. Если источника в ответе нет, явно покажи «Источник не указан». Напомни, что результат — подсказка для проверки человеком.
+5. Сделай страницу API для жюри или компактный раскрывающийся блок: POST /api/v1/analyze, GET /api/v1/jobs/{job_id}, заголовок X-API-Key, поле file и пример ответа JSON. Ключ показывай только как placeholder, не сохраняй и не раскрывай. Сохрани точные значения verdict: no_violation / violation и status: processing / done / failed. Не ломай схему API ради интерфейса.
+
+Продумай состояния: пустая загрузка, выбранный файл с кнопкой удаления, загрузка, обработка, успех без нарушений, результат с несколькими событиями, ошибка с кнопкой повтора. Таймкоды должны быть кликабельны, кадры открываться крупнее, ссылки на источники — в новой вкладке с безопасными атрибутами. Используй доступные подписи, контраст, клавиатурную навигацию. Никаких фиктивных результатов по умолчанию; если локальный API недоступен, покажи точное сообщение и что нужно настроить адрес сервиса.
 
 This project was built with [Lovable](https://lovable.dev).
 
+**Live app**: https://cash-eye-scanner.lovable.app
+
 ## Build with Lovable
 
-Open your project in the [Lovable editor](https://lovable.dev) and keep building.
+Continue developing this project in the [Lovable editor](https://lovable.dev/projects/9307c49d-8350-4cef-985e-cf0e674ef332).
 
 - **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: connect the project to GitHub and every change made in Lovable is committed straight to your repository.
-- **Full ownership**: this code is yours. Push to your repository and your changes sync back into Lovable, ready for your next prompt.
+- **Stay in sync**: every change made in Lovable is committed straight to this repository.
+- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
 
 ## Development
 
@@ -20,10 +33,3 @@ cd <repository-name>
 npm i
 npm run dev
 ```
-
-## Built with
-
-- TanStack Start
-- TypeScript
-- React
-- Tailwind CSS
