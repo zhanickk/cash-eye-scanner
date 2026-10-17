@@ -17,7 +17,7 @@
       <div class="topline"><div><div class="kicker">Текущая запись</div><h2 id="video-title">Выберите видео</h2></div><label class="upload">Загрузить видео<input id="video-file" type="file" accept="video/*"></label></div>
       <div class="notice" id="record-notice"></div>
 <div class="dataset-controls"><label>Часть набора<select id="split"><option value="unassigned">Не назначено</option><option value="train">Обучение</option><option value="validation">Проверка при разработке</option><option value="test">Итоговый тест</option></select></label><label>Исходная группа<input id="source-group" placeholder="Связанные записи — одна группа"></label><label>Камера<input id="camera-id" value="camera-01"></label></div>
-      <div class="player-wrap"><video id="player" controls playsinline></video><div id="empty-player">Выберите исходный видеофайл<br><small>Файл обрабатывается только этим браузером</small></div></div>
+      <div class="player-wrap"><video id="player" controls playsinline></video><button id="fullscreen-btn" class="fullscreen-btn" type="button" aria-label="Развернуть видео на весь экран">⛶ На весь экран</button><div id="empty-player">Выберите исходный видеофайл<br><small>Файл обрабатывается только этим браузером</small></div></div>
       <div class="timeline-row"><span id="current-time">00:00.0</span><input id="seek" type="range" min="0" max="100" step="0.1" value="0"><span id="duration">00:00.0</span></div>
       <div id="suggestions" class="suggestions"></div>
       <div class="event-form">
