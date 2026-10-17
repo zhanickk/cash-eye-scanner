@@ -68,7 +68,7 @@ function Index() {
         const job = await getJob(jobId, ac.signal);
         if (job.status === "done") { setPhase({ kind: "done", job }); return; }
         if (job.status === "failed") { setPhase({ kind: "failed", message: job.error || "Сервис не смог обработать видео." }); return; }
-        const queued = job.stage === "queued" || job.status === "queued";
+        const queued = job.stage === "queued";
         setPhase(queued ? { kind: "queued", jobId } : { kind: "analyzing", jobId, progress: job.progress });
         await new Promise((r) => setTimeout(r, POLL_INTERVAL_MS));
       }

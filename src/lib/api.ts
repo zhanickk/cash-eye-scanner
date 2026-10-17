@@ -190,14 +190,15 @@ export async function getJob(jobId: string, signal: AbortSignal): Promise<JobRes
     const msg = await readError(res);
     throw new ApiError(`Сервис вернул ошибку ${res.status}${msg ? `: ${msg}` : ""}`, "http");
   }
+  let payload: unknown;
   try {
-    const payload: unknown = await res.json();
-    try {
-      return parseJobResponse(payload);
-    } catch {
-      throw new ApiError("Ответ сервиса не соответствует формату API. Проверьте схему ответа.", "format");
-    }
+    payload = await res.json();
   } catch {
     throw new ApiError("Ответ сервиса не является JSON. Проверьте адрес сервиса.", "format");
+  }
+  try {
+    return parseJobResponse(payload);
+  } catch {
+    throw new ApiError("Ответ сервиса не соответствует формату API. Проверьте схему ответа.", "format");
   }
 }
