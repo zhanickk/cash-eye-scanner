@@ -52,47 +52,69 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 export function parseJobResponse(value: unknown): JobResponse {
-  if (!isRecord(value) || typeof value.job_id !== "string" ||
-      !["processing", "done", "failed"].includes(String(value.status))) throw new TypeError("Invalid job response");
-  if (value.verdict !== undefined && value.verdict !== "no_violation" && value.verdict !== "violation") throw new TypeError("Invalid verdict");
-  if (value.progress !== undefined && (typeof value.progress !== "number" || !Number.isFinite(value.progress))) throw new TypeError("Invalid progress");
-  if (value.stage !== undefined && typeof value.stage !== "string") throw new TypeError("Invalid stage");
-  if (value.error !== undefined && typeof value.error !== "string") throw new TypeError("Invalid error");
+  if (!isRecord(value)) throw new TypeError("Invalid job response");
+  const job_id = value["job_id"];
+  const status = value["status"];
+  const verdict = value["verdict"];
+  const progress = value["progress"];
+  const stage = value["stage"];
+  const error = value["error"];
+  const review_required = value["review_required"];
+  const limitations = value["limitations"];
+  const raw_violations = value["violations"];
+  if (typeof job_id !== "string" ||
+      !["processing", "done", "failed"].includes(String(status))) throw new TypeError("Invalid job response");
+  if (verdict !== undefined && verdict !== "no_violation" && verdict !== "violation") throw new TypeError("Invalid verdict");
+  if (progress !== undefined && (typeof progress !== "number" || !Number.isFinite(progress))) throw new TypeError("Invalid progress");
+  if (stage !== undefined && typeof stage !== "string") throw new TypeError("Invalid stage");
+  if (error !== undefined && typeof error !== "string") throw new TypeError("Invalid error");
   let violations: Violation[] | undefined;
-  if (value.violations !== undefined) {
-    if (!Array.isArray(value.violations)) throw new TypeError("Invalid violations");
-    violations = value.violations.map((item): Violation => {
-      if (!isRecord(item) || typeof item.type !== "string" || typeof item.description !== "string" ||
-          typeof item.timecode_sec !== "number" || !Number.isFinite(item.timecode_sec) || item.timecode_sec < 0 ||
-          !Array.isArray(item.evidence_frames) || item.evidence_frames.length < 1 || item.evidence_frames.length > 3) throw new TypeError("Invalid violation");
-      const evidence_frames = item.evidence_frames.map((frame): EvidenceFrame => {
-        if (!isRecord(frame) || typeof frame.timestamp_sec !== "number" ||
-            !Number.isFinite(frame.timestamp_sec) || frame.timestamp_sec < 0 ||
-            typeof frame.image_base64 !== "string") throw new TypeError("Invalid evidence frame");
-        return { timestamp_sec: frame.timestamp_sec, image_base64: frame.image_base64 };
+  if (raw_violations !== undefined) {
+    if (!Array.isArray(raw_violations)) throw new TypeError("Invalid violations");
+    violations = raw_violations.map((item): Violation => {
+      if (!isRecord(item)) throw new TypeError("Invalid violation");
+      const type = item["type"];
+      const description = item["description"];
+      const timecode_sec = item["timecode_sec"];
+      const raw_frames = item["evidence_frames"];
+      if (typeof type !== "string" || typeof description !== "string" ||
+          typeof timecode_sec !== "number" || !Number.isFinite(timecode_sec) || timecode_sec < 0 ||
+          !Array.isArray(raw_frames) || raw_frames.length < 1 || raw_frames.length > 3) throw new TypeError("Invalid violation");
+      const evidence_frames = raw_frames.map((frame): EvidenceFrame => {
+        if (!isRecord(frame)) throw new TypeError("Invalid evidence frame");
+        const timestamp_sec = frame["timestamp_sec"];
+        const image_base64 = frame["image_base64"];
+        if (typeof timestamp_sec !== "number" ||
+            !Number.isFinite(timestamp_sec) || timestamp_sec < 0 ||
+            typeof image_base64 !== "string") throw new TypeError("Invalid evidence frame");
+        return { timestamp_sec, image_base64 };
       });
       let rule: RuleReference | undefined;
-      if (isRecord(item.rule)) {
-        const ref = item.rule;
-        rule = { title: typeof ref.title === "string" ? ref.title : null,
-          section: typeof ref.section === "string" ? ref.section : null,
-          url: typeof ref.url === "string" && isSafeHttpUrl(ref.url) ? ref.url : null,
-          status: typeof ref.status === "string" ? ref.status : "unverified" };
+      const raw_rule = item["rule"];
+      if (isRecord(raw_rule)) {
+        const title = raw_rule["title"];
+        const section = raw_rule["section"];
+        const url = raw_rule["url"];
+        const rule_status = raw_rule["status"];
+        rule = { title: typeof title === "string" ? title : null,
+          section: typeof section === "string" ? section : null,
+          url: typeof url === "string" && isSafeHttpUrl(url) ? url : null,
+           status: typeof rule_status === "string" ? rule_status : "unverified" };
       }
-      return { type: item.type, timecode_sec: item.timecode_sec, description: item.description, evidence_frames, ...(rule ? { rule } : {}) };
+      return { type, timecode_sec, description, evidence_frames, ...(rule ? { rule } : {}) };
     });
   }
-  if (value.status === "done" && (value.verdict === undefined || violations === undefined)) throw new TypeError("Completed jobs require verdict and violations");
-  if (value.status === "done" && value.verdict !== (violations?.length ? "violation" : "no_violation")) throw new TypeError("Verdict disagrees with violations");
+  if (status === "done" && (verdict === undefined || violations === undefined)) throw new TypeError("Completed jobs require verdict and violations");
+  if (status === "done" && verdict !== (violations?.length ? "violation" : "no_violation")) throw new TypeError("Verdict disagrees with violations");
   return {
-    job_id: value.job_id, status: value.status as JobStatus,
-    ...(typeof value.stage === "string" ? { stage: value.stage } : {}),
-    ...(typeof value.progress === "number" ? { progress: value.progress } : {}),
-    ...(value.verdict ? { verdict: value.verdict as Verdict } : {}),
+    job_id, status: status as JobStatus,
+    ...(typeof stage === "string" ? { stage } : {}),
+    ...(typeof progress === "number" ? { progress } : {}),
+    ...(verdict ? { verdict: verdict as Verdict } : {}),
     ...(violations ? { violations } : {}),
-    ...(typeof value.error === "string" ? { error: value.error } : {}),
-    ...(typeof value.review_required === "boolean" ? { review_required: value.review_required } : {}),
-    ...(Array.isArray(value.limitations) && value.limitations.every(x => typeof x === "string") ? { limitations: value.limitations as string[] } : {}),
+    ...(typeof error === "string" ? { error } : {}),
+    ...(typeof review_required === "boolean" ? { review_required } : {}),
+    ...(Array.isArray(limitations) && limitations.every(x => typeof x === "string") ? { limitations: limitations as string[] } : {}),
   };
 }
 
@@ -247,7 +269,8 @@ async function uiToken(signal: AbortSignal): Promise<string> {
   catch (error) { if ((error as Error).name === "AbortError") throw error; throw unreachable(); }
   if (!response.ok) throw new ApiError("Не удалось создать сессию интерфейса", "http");
   const value: unknown = await response.json();
-  if (!isRecord(value) || typeof value.session_token !== "string") throw new ApiError("Сервис не вернул сессию интерфейса", "format");
-  sessionToken = value.session_token;
+  const token = isRecord(value) ? value["session_token"] : undefined;
+  if (typeof token !== "string") throw new ApiError("Сервис не вернул сессию интерфейса", "format");
+  sessionToken = token;
   return sessionToken;
 }
