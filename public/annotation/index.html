@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Разметка видео — ForteBank</title><link rel="stylesheet" href="style.css?v=side-by-side-1"><link rel="stylesheet" href="training.css">
+  <title>Разметка видео — ForteBank</title><link rel="stylesheet" href="style.css?v=side-by-side-2"><link rel="stylesheet" href="training.css">
 </head>
 <body>
   <header><div><span class="logo">F</span><span class="brand">Разметка видео</span></div><nav class="app-nav"><a class="nav-link active" href="/annotation/index.html">Разметка</a><a class="nav-link" href="/annotation/training.html">Обучение модели</a></nav><span class="offline">Локальный инструмент · данные остаются в браузере</span></header>
@@ -17,10 +17,10 @@
       <div class="topline"><div><div class="kicker">Текущая запись</div><h2 id="video-title">Выберите видео</h2></div><label class="upload">Загрузить видео<input id="video-file" type="file" accept="video/*"></label></div>
       <div class="notice" id="record-notice"></div>
 <div class="dataset-controls"><label>Часть набора<select id="split"><option value="unassigned">Не назначено</option><option value="train">Обучение</option><option value="validation">Проверка при разработке</option><option value="test">Итоговый тест</option></select></label><label>Исходная группа<input id="source-group" placeholder="Связанные записи — одна группа"></label><label>Камера<input id="camera-id" value="camera-01"></label></div>
-      <div class="annotation-layout"><div class="media-column"><div class="player-wrap"><video id="player" controls playsinline></video><div id="empty-player">Выберите исходный видеофайл<br><small>Файл обрабатывается только этим браузером</small></div></div>
+      <div class="annotation-layout" style="display:grid;grid-template-columns:minmax(0,1.15fr) minmax(360px,.85fr);gap:16px;align-items:start"><div class="media-column" style="position:sticky;top:82px;min-width:0"><div class="player-wrap"><video id="player" controls playsinline></video><div id="empty-player">Выберите исходный видеофайл<br><small>Файл обрабатывается только этим браузером</small></div></div>
       <div class="timeline-row"><span id="current-time">00:00.0</span><input id="seek" type="range" min="0" max="100" step="0.1" value="0"><span id="duration">00:00.0</span></div>
       <div id="suggestions" class="suggestions"></div></div>
-      <div class="annotation-column"><div class="event-form">
+      <div class="annotation-column" style="min-width:0;max-height:calc(100vh - 105px);overflow:auto;padding-right:4px"><div class="event-form">
         <div class="form-title"><div><div class="kicker">Новый эпизод</div><h3>Опишите наблюдаемое действие</h3></div><button id="use-current" class="secondary">Взять время плеера</button></div>
         <div class="fields"><label>Категория<select id="type"></select></label><label>Начало, сек.<input id="start" type="number" min="0" step="0.1"></label><label>Конец, сек.<input id="end" type="number" min="0" step="0.1"></label></div>
         <label>Что видно на видео<textarea id="description" rows="2" placeholder="Только наблюдаемый факт, без предположения о намерении"></textarea></label>
@@ -38,6 +38,6 @@
       <label class="review-notes">Комментарий к просмотру<textarea id="review-notes" rows="2" placeholder="Почему безопасный похожий эпизод не является нарушением; что неразборчиво"></textarea></label><div id="save-status" role="status"></div><footer>Экспортируйте резервную копию JSON после работы. Финальный статус требует просмотра всего ролика. Времена из исходного списка — только подсказки.</footer></div></div>
     </section>
   </main>
-  <script src="data.js"></script><script src="app.js?v=side-by-side-1"></script>
+  <script src="data.js"></script><script src="app.js?v=side-by-side-2"></script>
 </body>
 </html>
