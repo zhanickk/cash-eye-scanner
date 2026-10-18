@@ -10,11 +10,17 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AnnotationRouteImport } from './routes/annotation'
 import { Route as ApiDocsRouteImport } from './routes/api-docs'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AnnotationRoute = AnnotationRouteImport.update({
+  id: '/annotation',
+  path: '/annotation',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiDocsRoute = ApiDocsRouteImport.update({
@@ -25,27 +31,31 @@ const ApiDocsRoute = ApiDocsRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/annotation': typeof AnnotationRoute
   '/api-docs': typeof ApiDocsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/annotation': typeof AnnotationRoute
   '/api-docs': typeof ApiDocsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/annotation': typeof AnnotationRoute
   '/api-docs': typeof ApiDocsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api-docs'
+  fullPaths: '/' | '/annotation' | '/api-docs'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api-docs'
-  id: '__root__' | '/' | '/api-docs'
+  to: '/' | '/annotation' | '/api-docs'
+  id: '__root__' | '/' | '/annotation' | '/api-docs'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AnnotationRoute: typeof AnnotationRoute
   ApiDocsRoute: typeof ApiDocsRoute
 }
 
@@ -56,6 +66,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/annotation': {
+      id: '/annotation'
+      path: '/annotation'
+      fullPath: '/annotation'
+      preLoaderRoute: typeof AnnotationRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api-docs': {
@@ -70,6 +87,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AnnotationRoute: AnnotationRoute,
   ApiDocsRoute: ApiDocsRoute,
 }
 export const routeTree = rootRouteImport
