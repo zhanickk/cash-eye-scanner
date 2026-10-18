@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "note": "Категории — рабочая таксономия, не нормативные утверждения. Незаверенные источники не генерируются моделью.",
+  "note": "Ссылки сверены с текстом актов (зеркало zakon.uchet.kz, редакция на 18.10.2026). Для категорий без найденной нормы источник не указывается.",
   "rules": [
     {
       "type": "left_cabinet_open",
@@ -18,10 +18,11 @@
       ],
       "requires_complete_context": false,
       "rule_reference": {
-        "title": null,
-        "section": null,
-        "url": null,
-        "status": "unverified"
+        "title": "Правила организации охраны и устройства помещений банков второго уровня (постановление Правления НБРК от 24.02.2020 № 14)",
+        "section": "п. 16 пп. 1)",
+        "url": "https://adilet.zan.kz/rus/docs/V2000020075",
+        "quote": "каждая касса имеет отдельный вход с закрывающейся на замок дверью",
+        "status": "verified_text"
       },
       "enabled": true
     },
@@ -43,10 +44,11 @@
       ],
       "requires_complete_context": false,
       "rule_reference": {
-        "title": null,
-        "section": null,
-        "url": null,
-        "status": "unverified"
+        "title": "Правила осуществления кассовых операций и операций по инкассации банкнот, монет и ценностей (постановление Правления НБРК от 29.11.2019 № 231)",
+        "section": "п. 20 (часть вторая); п. 76",
+        "url": "https://adilet.zan.kz/rus/docs/V1900019680",
+        "quote": "Ключи и (или) коды … от двери кладовой и (или) сейфовой комнаты банка хранятся у лиц, ответственных за сохранность наличных денег",
+        "status": "verified_text"
       },
       "enabled": true
     },
@@ -69,7 +71,8 @@
         "title": null,
         "section": null,
         "url": null,
-        "status": "unverified"
+        "status": "norm_not_found",
+        "note": "Прямая норма в открытых актах НБРК не найдена; требуется подтверждение регламентом"
       },
       "enabled": true
     },
@@ -92,7 +95,8 @@
         "title": null,
         "section": null,
         "url": null,
-        "status": "unverified"
+        "status": "norm_not_found",
+        "note": "Прямая норма в открытых актах НБРК не найдена; требуется подтверждение регламентом"
       },
       "enabled": true
     },
@@ -112,10 +116,11 @@
       ],
       "requires_complete_context": false,
       "rule_reference": {
-        "title": null,
-        "section": null,
-        "url": null,
-        "status": "unverified"
+        "title": "Правила осуществления кассовых операций и операций по инкассации банкнот, монет и ценностей (постановление Правления НБРК от 29.11.2019 № 231)",
+        "section": "п. 20 (часть вторая); п. 22",
+        "url": "https://adilet.zan.kz/rus/docs/V1900019680",
+        "quote": "Все ранее принятые наличные деньги хранятся в специальных устройствах … закрывающихся на ключ",
+        "status": "verified_text"
       },
       "enabled": true
     },
@@ -134,10 +139,11 @@
       "cancel_events": [],
       "requires_complete_context": false,
       "rule_reference": {
-        "title": null,
-        "section": null,
-        "url": null,
-        "status": "unverified"
+        "title": "Правила осуществления кассовых операций и операций по инкассации банкнот, монет и ценностей (постановление Правления НБРК от 29.11.2019 № 231)",
+        "section": "п. 20; п. 35",
+        "url": "https://adilet.zan.kz/rus/docs/V1900019680",
+        "quote": "Наличные деньги принимаются и пересчитываются кассовым работником в присутствии клиента",
+        "status": "verified_text"
       },
       "enabled": true
     },
@@ -155,10 +161,11 @@
       "cancel_events": [],
       "requires_complete_context": true,
       "rule_reference": {
-        "title": null,
-        "section": null,
-        "url": null,
-        "status": "unverified"
+        "title": "Правила осуществления кассовых операций и операций по инкассации банкнот, монет и ценностей (постановление Правления НБРК от 29.11.2019 № 231)",
+        "section": "п. 19 пп. 1); п. 31 пп. 1)",
+        "url": "https://adilet.zan.kz/rus/docs/V1900019680",
+        "quote": "проводит визуальную идентификацию клиента … с документом, удостоверяющим его личность",
+        "status": "verified_text"
       },
       "enabled": true
     },
@@ -176,10 +183,11 @@
       "cancel_events": [],
       "requires_complete_context": true,
       "rule_reference": {
-        "title": null,
-        "section": null,
-        "url": null,
-        "status": "unverified"
+        "title": "Правила осуществления кассовых операций и операций по инкассации банкнот, монет и ценностей (постановление Правления НБРК от 29.11.2019 № 231)",
+        "section": "п. 19 пп. 2); п. 20",
+        "url": "https://adilet.zan.kz/rus/docs/V1900019680",
+        "quote": "принимает банкноты с полистным пересчетом … с проверкой на подлинность и платежность",
+        "status": "verified_text"
       },
       "enabled": true
     },
@@ -197,10 +205,11 @@
       "cancel_events": [],
       "requires_complete_context": true,
       "rule_reference": {
-        "title": null,
-        "section": null,
-        "url": null,
-        "status": "unverified"
+        "title": "Правила осуществления кассовых операций и операций по инкассации банкнот, монет и ценностей (постановление Правления НБРК от 29.11.2019 № 231)",
+        "section": "п. 20 (часть вторая)",
+        "url": "https://adilet.zan.kz/rus/docs/V1900019680",
+        "quote": "На рабочем месте кассового работника находятся наличные деньги клиента. Все ранее принятые наличные деньги хранятся в специальных устройствах … закрывающихся на ключ",
+        "status": "verified_text"
       },
       "enabled": true
     },
@@ -218,10 +227,11 @@
       "cancel_events": [],
       "requires_complete_context": false,
       "rule_reference": {
-        "title": null,
-        "section": null,
-        "url": null,
-        "status": "unverified"
+        "title": "Правила осуществления кассовых операций и операций по инкассации банкнот, монет и ценностей (постановление Правления НБРК от 29.11.2019 № 231)",
+        "section": "п. 19 пп. 2)",
+        "url": "https://adilet.zan.kz/rus/docs/V1900019680",
+        "quote": "принимает банкноты с полистным пересчетом … с проверкой на подлинность и платежность",
+        "status": "verified_text"
       },
       "enabled": true
     },
@@ -242,7 +252,8 @@
         "title": null,
         "section": null,
         "url": null,
-        "status": "unverified"
+        "status": "norm_not_found",
+        "note": "Прямая норма в открытых актах НБРК не найдена; требуется подтверждение регламентом"
       },
       "enabled": true
     },
@@ -260,10 +271,31 @@
       "cancel_events": [],
       "requires_complete_context": false,
       "rule_reference": {
+        "title": "Правила осуществления кассовых операций и операций по инкассации банкнот, монет и ценностей (постановление Правления НБРК от 29.11.2019 № 231)",
+        "section": "пп. 46–50",
+        "url": "https://adilet.zan.kz/rus/docs/V1900019680",
+        "quote": "требования к упаковке банкнот в корешки и пачки с бандеролью и накладками",
+        "status": "verified_text"
+      },
+      "enabled": true
+    },
+    {
+      "type": "other_procedure_violation",
+      "name": "Иное нарушение кассовой процедуры",
+      "definition": "Явно видимое действие, нарушающее порядок работы с ценностями или помещением, не подходящее под другие категории.",
+      "not_violation_examples": "Обычные движения, разговор с клиентом, работа с документами в ходе операции.",
+      "visibility": "Зависит от события",
+      "mode": "vlm",
+      "state_events": [],
+      "trigger_event": null,
+      "cancel_events": [],
+      "requires_complete_context": false,
+      "rule_reference": {
         "title": null,
         "section": null,
         "url": null,
-        "status": "unverified"
+        "status": "norm_not_found",
+        "note": "Прямая норма в открытых актах НБРК не найдена; требуется подтверждение регламентом"
       },
       "enabled": true
     }
