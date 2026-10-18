@@ -17,10 +17,10 @@
       <div class="topline"><div><div class="kicker">Текущая запись</div><h2 id="video-title">Выберите видео</h2></div><label class="upload">Загрузить видео<input id="video-file" type="file" accept="video/*"></label></div>
       <div class="notice" id="record-notice"></div>
 <div class="dataset-controls"><label>Часть набора<select id="split"><option value="unassigned">Не назначено</option><option value="train">Обучение</option><option value="validation">Проверка при разработке</option><option value="test">Итоговый тест</option></select></label><label>Исходная группа<input id="source-group" placeholder="Связанные записи — одна группа"></label><label>Камера<input id="camera-id" value="camera-01"></label></div>
-      <div class="player-wrap"><video id="player" controls playsinline></video><button id="fullscreen-btn" class="fullscreen-btn" type="button" aria-label="Развернуть видео на весь экран">⛶ На весь экран</button><div id="empty-player">Выберите исходный видеофайл<br><small>Файл обрабатывается только этим браузером</small></div></div>
+      <div class="annotation-layout"><div class="media-column"><div class="player-wrap"><video id="player" controls playsinline></video><div id="empty-player">Выберите исходный видеофайл<br><small>Файл обрабатывается только этим браузером</small></div></div>
       <div class="timeline-row"><span id="current-time">00:00.0</span><input id="seek" type="range" min="0" max="100" step="0.1" value="0"><span id="duration">00:00.0</span></div>
-      <div id="suggestions" class="suggestions"></div>
-      <div class="event-form">
+      <div id="suggestions" class="suggestions"></div></div>
+      <div class="annotation-column"><div class="event-form">
         <div class="form-title"><div><div class="kicker">Новый эпизод</div><h3>Опишите наблюдаемое действие</h3></div><button id="use-current" class="secondary">Взять время плеера</button></div>
         <div class="fields"><label>Категория<select id="type"></select></label><label>Начало, сек.<input id="start" type="number" min="0" step="0.1"></label><label>Конец, сек.<input id="end" type="number" min="0" step="0.1"></label></div>
         <label>Что видно на видео<textarea id="description" rows="2" placeholder="Только наблюдаемый факт, без предположения о намерении"></textarea></label>
@@ -35,7 +35,7 @@
 <label><span><input id="frame-reviewed" type="checkbox"> На этом кадре размечены все видимые объекты выбранных классов датасета</span></label>
 <div id="spatial-items"></div><div id="spatial-frames" class="suggestions"></div></section>
 <section class="events-section"><div class="form-title"><div><div class="kicker">Разметка ролика</div><h3>Отмеченные эпизоды</h3></div><label class="status-select">Итог просмотра<select id="review-status"><option value="unreviewed">Ещё не просмотрено</option><option value="reviewed_no_violation">Просмотрено: нарушений нет</option><option value="reviewed_with_violations">Просмотрено: есть эпизоды</option><option value="needs_adjudication">Нужно решение эксперта</option></select></label></div><div id="events"></div></section>
-      <label class="review-notes">Комментарий к просмотру<textarea id="review-notes" rows="2" placeholder="Почему безопасный похожий эпизод не является нарушением; что неразборчиво"></textarea></label><div id="save-status" role="status"></div><footer>Экспортируйте резервную копию JSON после работы. Финальный статус требует просмотра всего ролика. Времена из исходного списка — только подсказки.</footer>
+      <label class="review-notes">Комментарий к просмотру<textarea id="review-notes" rows="2" placeholder="Почему безопасный похожий эпизод не является нарушением; что неразборчиво"></textarea></label><div id="save-status" role="status"></div><footer>Экспортируйте резервную копию JSON после работы. Финальный статус требует просмотра всего ролика. Времена из исходного списка — только подсказки.</footer></div></div>
     </section>
   </main>
   <script src="data.js"></script><script src="app.js"></script>
