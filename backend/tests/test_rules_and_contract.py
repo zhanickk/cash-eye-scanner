@@ -5,7 +5,8 @@ import pytest
 
 from forte.contracts import validate_result
 from forte.rules import Observation as O, ProcessRules
-from forte.analyzer import accept_proposal, parse_model
+from forte.analyzer import accept_event, evidence_times
+from forte.prompting import parse_answer, window_times
 
 
 def obs(kind, time):
@@ -30,23 +31,29 @@ def test_stale_and_cancelled_states_cannot_prove_unsafe_exit():
     assert ProcessRules().feed([obs('safe_open', 1), obs('safe_closed', 2), obs('employee_exit', 3)]) == []
 
 
-def test_sparse_frames_cannot_prove_missing_identity_step():
-    event = {'category': 'client_not_identified', 'decision': 'supported', 'context_complete': True,
-             'start_sec': 0, 'end_sec': 3, 'timecode_sec': 2, 'evidence_times': [2], 'description': 'no ID'}
-    assert accept_proposal(event, [0, 2, 3], 10) is None
+def test_event_snaps_to_a_sent_frame_and_unknown_category_is_rejected():
+    event = {'category': 'client_flow_violation', 'timecode_sec': 2.3, 'description': 'action'}
+    assert accept_event(event, [0, 1, 2, 3])['timecode_sec'] == 2
+    assert accept_event({**event, 'category': 'invented'}, [0, 1, 2, 3]) is None
+    assert accept_event({**event, 'description': ' '}, [0, 1, 2, 3]) is None
 
 
 def test_hallucinated_frame_or_nonfinite_time_is_rejected():
-    event = {'category': 'client_flow_violation', 'decision': 'supported', 'context_complete': True,
-             'start_sec': 0, 'end_sec': 3, 'timecode_sec': 2, 'evidence_times': [1.7], 'description': 'action'}
-    assert accept_proposal(event, [0, 2, 3], 10) is None
-    event.update(evidence_times=[2], timecode_sec=math.nan)
-    assert accept_proposal(event, [0, 2, 3], 10) is None
+    event = {'category': 'client_flow_violation', 'timecode_sec': 9.0, 'description': 'action'}
+    assert accept_event(event, [0, 1, 2, 3]) is None
+    assert accept_event({**event, 'timecode_sec': math.nan}, [0, 1, 2, 3]) is None
 
 
 def test_bad_model_output_is_an_error_not_a_clean_video():
     with pytest.raises(ValueError):
-        parse_model('{"events":[]}')
+        parse_answer('{"violations":[]}')
+    assert parse_answer('```json\n{"events":[]}\n```') == []
+
+
+def test_windows_use_whole_seconds_and_stay_inside_video():
+    assert window_times(16, 32, 30) == [float(t) for t in range(16, 32)]
+    assert window_times(0, 11.6, 30)[-1] == 11
+    assert evidence_times(11.0, 11.6, 30) == [11.0, 10.0]
 
 
 def test_jury_verdict_consistency_and_evidence_required():

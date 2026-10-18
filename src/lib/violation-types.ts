@@ -10,5 +10,6 @@ export const TYPE_NAMES: Record<string, string> = {
   "client_funds_mixed": "Смешаны деньги разных клиентов",
   "equipment_not_activated": "Оборудование не приведено в рабочее состояние",
   "talked_to_outsider": "Взаимодействие с посторонним",
-  "money_not_banded": "Пачка помещена без требуемой фиксации"
+  "money_not_banded": "Пачка помещена без требуемой фиксации",
+  "other_procedure_violation": "Иное нарушение кассовой процедуры"
 };

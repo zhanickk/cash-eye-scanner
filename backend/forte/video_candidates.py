@@ -55,14 +55,25 @@ def motion_candidates(path: Path, limit: int = 10, spacing_sec: int = 4) -> list
     return selected
 
 
+def read_frame(video, seconds: float, fps: float = 30.0, max_back_sec: float = 2.0) -> np.ndarray:
+    """Container frame counts often overstate the last frames; step back until one decodes."""
+    second = max(0.0, seconds)
+    floor = max(0.0, second - max_back_sec)
+    while second >= floor:
+        video.set(cv2.CAP_PROP_POS_MSEC, second * 1000)
+        ok, frame = video.read()
+        if ok:
+            return frame
+        second -= 1 / fps
+    raise ValueError(f'Нет кадра на {seconds:.1f} секунде')
+
+
 def frame_at(path: Path, seconds: float) -> np.ndarray:
     video = cv2.VideoCapture(str(path))
-    video.set(cv2.CAP_PROP_POS_MSEC, max(0, seconds) * 1000)
-    ok, frame = video.read()
-    video.release()
-    if not ok:
-        raise ValueError(f'Нет кадра на {seconds:.1f} секунде')
-    return frame
+    try:
+        return read_frame(video, seconds, video.get(cv2.CAP_PROP_FPS) or 30.0)
+    finally:
+        video.release()
 
 
 def evidence_jpeg(path: Path, seconds: float, quality: int = 82) -> bytes:
